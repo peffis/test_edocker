@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: test-edocker-deployment
+spec:
+  replicas: 1 
+  template: 
+    metadata:
+      labels:
+        app: test-edocker
+    spec:
+      containers:
+      - name: test-edocker
+        image: test_edocker_release:0.1.1
+        env:
+        - name: EDOCKER_NAME
+          value: edocker
+        - name: EDOCKER_HOST
+          valueFrom:
+             fieldRef:
+                 fieldPath: status.podIP
+        - name: EDOCKER_COOKIE
+          value: thecookiethatweallgonnause
+        - name: EDOCKER_POD_NAME
+          valueFrom:
+             fieldRef:
+                fieldPath: metadata.name
+        - name: EDOCKER_POD_NAMESPACE
+          valueFrom:
+             fieldRef:
+                fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+      - name: kube-proxy
+        image: gcr.io/google_containers/kubectl:v0.18.0-120-gaeb4ac55ad12b1-dirty
+        imagePullPolicy: Always
+        args: ["proxy", "-p", "8001"]
